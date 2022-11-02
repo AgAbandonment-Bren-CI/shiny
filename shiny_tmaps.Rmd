@@ -1,0 +1,46 @@
+---
+title: "shiny_map_builder"
+author: "Lucas Boyd"
+date: "11/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(raster)
+library(tmap)
+library(sf)
+library(raster)
+library(terra)
+
+```
+
+```{r}
+# reading in aggregated raster layers
+ssp1 <- raster(here("data", "50k", "ssp1_50k.tif"))
+ssp1 <- raster(here("data", "50k", "ssp1_50k.tif"))
+ssp1 <- raster(here("data", "50k", "ssp1_50k.tif"))
+ssp1 <- raster(here("data", "50k", "ssp1_50k.tif"))
+ssp1 <- raster(here("data", "50k", "ssp1_50k.tif"))
+carbon <- raster(here("data", "50k", "carbon_50k.tif"))
+bd <- raster(here("data", "50k", "bd_50k.tif"))
+```
+
+```{r}
+# drafting the tmaps 
+tmap_mode(mode = "view")
+
+tm_shape(ssp1) + 
+  tm_raster(col = "ssp1_50k", palette = "Reds", style = "cont", alpha = 0.7) + 
+tm_shape(carbon) + 
+  tm_raster(col = "carbon_50k", palette = "Blues", style = "cont", alpha = 0.7)
+```
+
+```{r}
+tm_shape(ssp1) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
+        tm_raster(col = "ssp1_50k", palette = "Reds", style = "cont", alpha = 0.7) + 
+        tm_raster(col = "carbon_50k", palette = "Blues", style = "cont", alpha = 1)
+```
+
