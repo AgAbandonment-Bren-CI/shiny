@@ -20,17 +20,17 @@ library(terra)
 
 ```{r}
 # ABANDONMENT 
-ssp1 <- raster(here("data", "chen", "SSP1_abandoned_cropland_global.tif"))
-ssp2 <- raster(here("data", "chen", "SSP2_abandoned_cropland_global.tif"))
-ssp3 <- raster(here("data", "chen", "SSP3_abandoned_cropland_global.tif"))
-ssp4 <- raster(here("data", "chen", "SSP4_abandoned_cropland_global.tif"))
-ssp5 <- raster(here("data", "chen", "SSP5_abandoned_cropland_global.tif"))
+ssp1 <- rast(here("data", "chen", "SSP1_abandoned_cropland_global.tif"))
+ssp2 <- rast(here("data", "chen", "SSP2_abandoned_cropland_global.tif"))
+ssp3 <- rast(here("data", "chen", "SSP3_abandoned_cropland_global.tif"))
+ssp4 <- rast(here("data", "chen", "SSP4_abandoned_cropland_global.tif"))
+ssp5 <- rast(here("data", "chen", "SSP5_abandoned_cropland_global.tif"))
 
 # CARBON
-carbon <- raster(here("data", "carbon", "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr.tif"))
+carbon <- rast(here("data", "carbon", "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr.tif"))
 
 # Biodiversity
-bd <- raster(here("data", "bd", "sparc_conservationPriorities.tif"))
+bd <- rast(here("data", "bd", "sparc_conservationPriorities.tif"))
 
 # quick plots to show outputs
 plot(carbon)
@@ -44,21 +44,26 @@ abandon_factor <- 50 # for SSP abandonment rasters (original = 1k)
 carbon_factor <- 50 # for carbon layer (original = 1k)
 bd_factor <- 10 # for biodiversity layer (original = ~5k)
 
+## Is this easier than just putting the numbers in the aggregate() fxn? -NM
 ```
 
 # create abandonment rasters
 # SSP1
 ```{r}
 # aggregate SSP1 to 50k resolution
-ssp1_aggregate <- aggregate(ssp1, fact = abandon_factor, expand = FALSE, fun = sum)
+ssp1_aggregate <- aggregate(ssp1, fact = abandon_factor, fun = sum)
 
 # replacing zeros with NA values for visualization
 ssp1_aggregate[ssp1_aggregate == 0] <- NA
 
 # save out the raster
-writeRaster(ssp1_aggregate, filename = "ssp1_50k.tif", overwrite = TRUE)
 
-ssp1_50k <- raster(here("data", "50k", "ssp1_50k.tif"))
+## changed filename to automatically save in correct folder
+## that way you don't manually have to move it and reload within this code chunk -NM
+writeRaster(ssp1_aggregate, filename = "data/50k/ssp1_50k.tif", overwrite = TRUE)
+
+
+ssp1_50k <- rast(here("data", "50k", "ssp1_50k.tif"))
 
 plot(ssp1_50k)
 
@@ -67,44 +72,45 @@ plot(ssp1_50k)
 # SSP2
 ```{r}
 # aggregate to 50k resolution
-ssp2_aggregate <- aggregate(ssp2, fact = abandon_factor, expand = FALSE, fun = sum)
+ssp2_aggregate <- aggregate(ssp2, fact = abandon_factor, fun = sum)
 
 # replacing zeros with NA values for visualization
 ssp1_aggregate[ssp2_aggregate == 0] <- NA
 
 # save out the raster
-writeRaster(ssp2_aggregate, filename = "ssp2_50k.tif", overwrite = TRUE)
+writeRaster(ssp2_aggregate, filename = "data/50k/ssp2_50k.tif", overwrite = TRUE)
 
-ssp2_50k <- raster(here("data", "50k", "ssp2_50k.tif"))
+ssp2_50k <- rast(here("data", "50k", "ssp2_50k.tif"))
 
 ```
+
 # SSP3
 ```{r}
 # aggregate to 50k resolution
-ssp3_aggregate <- aggregate(ssp3, fact = abandon_factor, expand = FALSE, fun = sum)
+ssp3_aggregate <- aggregate(ssp3, fact = abandon_factor, fun = sum)
 
 # replacing zeros with NA values for visualization
 ssp3_aggregate[ssp3_aggregate == 0] <- NA
 
 # save out the raster
-writeRaster(ssp3_aggregate, filename = "ssp3_50k.tif", overwrite = TRUE)
+writeRaster(ssp3_aggregate, filename = "data/50k/ssp3_50k.tif", overwrite = TRUE)
 
-ssp3_50k <- raster(here("data", "50k", "ssp3_50k.tif"))
+ssp3_50k <- rast(here("data", "50k", "ssp3_50k.tif"))
 
 ```
 
 # SSP4
 ```{r}
 # aggregate to 50k resolution
-ssp4_aggregate <- aggregate(ssp4, fact = abandon_factor, expand = FALSE, fun = sum)
+ssp4_aggregate <- aggregate(ssp4, fact = abandon_factor, fun = sum)
 
 # replacing zeros with NA values for visualization
 ssp4_aggregate[ssp4_aggregate == 0] <- NA
 
 # save out the raster
-writeRaster(ssp4_aggregate, filename = "ssp4_50k.tif", overwrite = TRUE)
+writeRaster(ssp4_aggregate, filename = "data/50k/ssp4_50k.tif", overwrite = TRUE)
 
-ssp4_50k <- raster(here("data", "50k", "ssp4_50k.tif"))
+ssp4_50k <- rast(here("data", "50k", "ssp4_50k.tif"))
 
 ```
 
@@ -112,35 +118,48 @@ ssp4_50k <- raster(here("data", "50k", "ssp4_50k.tif"))
 
 ```{r}
 # aggregate to 50k resolution
-ssp5_aggregate <- aggregate(ssp5, fact = abandon_factor, expand = FALSE, fun = sum)
+ssp5_aggregate <- aggregate(ssp5, fact = abandon_factor, fun = sum)
 
 # replacing zeros with NA values for visualization
 ssp5_aggregate[ssp5_aggregate == 0] <- NA
 
 # save out the raster
-writeRaster(ssp5_aggregate, filename = "ssp5_50k.tif", overwrite = TRUE)
+writeRaster(ssp5_aggregate, filename = "data/50k/ssp5_50k.tif", overwrite = TRUE)
 
-ssp5_50k <- raster(here("data", "50k", "ssp5_50k.tif"))
+ssp5_50k <- rast(here("data", "50k", "ssp5_50k.tif"))
 ```
 
 # CARBON
 
 ```{r}
-# aggregating layer by mean 
-carbon_aggregate <- aggregate(carbon, fact = carbon_factor, expand = FALSE, fun = mean)
+# change carbon to CRS of abandonment then project in same crs
+carbon_aggregate <- carbon %>% 
+  aggregate(fact = carbon_factor, fun = mean, na.rm = TRUE) %>% 
+  project(y = crs(ssp1_50k))
+
+# make carbon layer exactly match the spatial extent of the abandonment
+carbon_resamp <- resample(carbon_aggregate, ssp1_50k, method = "bilinear")
 
 # saving out the raster
-writeRaster(carbon_aggregate, filename = "carbon_50k.tif", overwrite = TRUE)
+writeRaster(carbon_resamp, filename = "data/carbon/carbon_50k.tif", overwrite = TRUE)
+
+carbon_50k <- rast(here("data", "carbon", "carbon_50k.tif"))
 ```
 
 # BIODIVERSITY - projection still coming up weird
 ```{r}
-# changing the projection to that of abandonment layer
-bd <- projectRaster(bd, crs = crs(ssp1))  
+# change biodiversity to CRS of abandonment then project in same crs
+bd_aggregate <- bd %>% 
+  aggregate(fact = bd_factor, fun = mean, na.rm = TRUE) %>% 
+  project(y = crs(ssp1_50k))
 
-# aggregating to 50k resolution
-bd_aggregate <- aggregate(bd, fact = bd_factor, expand = FALSE, fun = mean)
-plot(bd_aggregate)
+# make carbon layer exactly match the spatial extent of the abandonment
+bd_resamp <- resample(bd_aggregate, ssp1_50k, method = "bilinear")
+
+plot(bd_resamp)
+plot(carbon_50k, add = TRUE)
+
+
 # saving out the raster
 # writeRaster(bd_aggregate, filename = "bd_50k.tif", overwrite = TRUE)
 tmap_mode(mode = "view")
