@@ -66,7 +66,7 @@ writeRaster(ssp1_aggregate, filename = "data/50k/ssp1_50k.tif", overwrite = TRUE
 ssp1_50k <- rast(here("data", "50k", "ssp1_50k.tif"))
 
 plot(ssp1_50k)
-
+crs(ssp1_50k)
 ```
 
 # SSP2
