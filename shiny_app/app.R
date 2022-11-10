@@ -14,10 +14,11 @@ ssp2 <- raster(here("data", "50k", "ssp2_50k.tif"))
 ssp3 <- raster(here("data", "50k", "ssp3_50k.tif"))
 ssp4 <- raster(here("data", "50k", "ssp4_50k.tif"))
 ssp5 <- raster(here("data", "50k", "ssp5_50k.tif"))
-carbon <- raster(here("data", "50k", "carbon_50k.tif"))
-bd <- raster(here("data", "50k", "bd_50k.tif"))
+carbon <- raster(here("data", "carbon", "carbon_50k.tif"))
+# bd <- raster(here("data", "50k", "bd_50k.tif"))
                
-# Define UI for application that draws a histogram
+### BEGIN UI ###
+
 ui <- fluidPage(
   navbarPage(theme = shinytheme("flatly"),
              tags$head(tags$style(HTML('.navbar-static-top {background-color: 2E86C1;}',
@@ -64,6 +65,8 @@ ui <- fluidPage(
              ) # end tab 2
   ) # end navbarpage
 ) # end UI
+
+### BEGIN SERVER ###
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {

@@ -20,11 +20,11 @@ library(terra)
 
 ```{r}
 # ABANDONMENT 
-ssp1 <- rast(here("data", "chen", "SSP1_abandoned_cropland_global.tif"))
-ssp2 <- rast(here("data", "chen", "SSP2_abandoned_cropland_global.tif"))
-ssp3 <- rast(here("data", "chen", "SSP3_abandoned_cropland_global.tif"))
-ssp4 <- rast(here("data", "chen", "SSP4_abandoned_cropland_global.tif"))
-ssp5 <- rast(here("data", "chen", "SSP5_abandoned_cropland_global.tif"))
+ssp1 <- rast(here("data", "chen", "SSP1_abandoned_cropland_2050_global.tif"))
+ssp2 <- rast(here("data", "chen", "SSP2_abandoned_cropland_2050_global.tif"))
+ssp3 <- rast(here("data", "chen", "SSP3_abandoned_cropland_2050_global.tif"))
+ssp4 <- rast(here("data", "chen", "SSP4_abandoned_cropland_2050_global.tif"))
+ssp5 <- rast(here("data", "chen", "SSP5_abandoned_cropland_2050_global.tif"))
 
 # CARBON
 carbon <- rast(here("data", "carbon", "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr.tif"))
@@ -144,6 +144,8 @@ carbon_resamp <- resample(carbon_aggregate, ssp1_50k, method = "bilinear")
 writeRaster(carbon_resamp, filename = "data/carbon/carbon_50k.tif", overwrite = TRUE)
 
 carbon_50k <- rast(here("data", "carbon", "carbon_50k.tif"))
+
+plot(carbon_50k)
 ```
 
 # BIODIVERSITY - projection still coming up weird
