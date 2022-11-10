@@ -72,14 +72,31 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+  ssp_reactive <- reactive({ 
+  message("value of ssp_radio", paste(input$ssp_radio, collapse = ";")) 
+    input$ssp_radio
+  }) # end reactive subset
+  
+  
 # Front page tmap
   output$ab_tmap <- renderTmap({
-    tm_shape(ssp1) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
-      tm_raster(title = "Abandonment (km^2)", col = "global_PFT_2015", palette = "Reds", style = "cont", alpha = 0.7) + 
+    tm_shape(shp = ssp_reactive()) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
+      tm_raster(title = "Abandonment (km^2)", 
+                col = "global_PFT_2015", 
+                palette = "Reds", 
+                style = "cont", 
+                alpha = 0.7) + 
       tm_shape(carbon) +
-      tm_raster(title = "C seq. (mg/ha/yr)", col = "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr", palette = "Blues", style = "cont", alpha = input$carbon_slide)
+      tm_raster(title = "C seq. (mg/ha/yr)", 
+                col = "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr", 
+                palette = "Blues", 
+                style = "cont", 
+                alpha = input$carbon_slide)
   }) # end tmap 1
 }
+
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
