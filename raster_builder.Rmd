@@ -23,8 +23,8 @@ library(terra)
 ssp1 <- rast(here("data", "chen", "SSP1_abandoned_cropland_2050_global.tif"))
 ssp2 <- rast(here("data", "chen", "SSP2_abandoned_cropland_2050_global.tif"))
 ssp3 <- rast(here("data", "chen", "SSP3_abandoned_cropland_2050_global.tif"))
-ssp4 <- rast(here("data", "chen", "SSP4_abandoned_cropland_2050_global.tif"))
-ssp5 <- rast(here("data", "chen", "SSP5_abandoned_cropland_2050_global.tif"))
+ssp4 <- rast(here("data", "chen", "SSP4_abandoned_cropland_2050_global.tif")) 
+ssp5 <- rast(here("data", "chen", "SSP5_abandoned_cropland_2050_global.tif")) 
 
 # CARBON
 carbon <- rast(here("data", "carbon", "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr.tif"))
@@ -51,7 +51,7 @@ bd_factor <- 10 # for biodiversity layer (original = ~5k)
 # SSP1
 ```{r}
 # aggregate SSP1 to 50k resolution
-ssp1_aggregate <- aggregate(ssp1, fact = abandon_factor, fun = sum)
+ssp1_aggregate <- aggregate(ssp1, fact = abandon_factor, fun = sum) %>% project("epsg:4326")
 
 # replacing zeros with NA values for visualization
 ssp1_aggregate[ssp1_aggregate == 0] <- NA
@@ -63,16 +63,17 @@ ssp1_aggregate[ssp1_aggregate == 0] <- NA
 writeRaster(ssp1_aggregate, filename = "data/50k/ssp1_50k.tif", overwrite = TRUE)
 
 
-ssp1_50k <- rast(here("data", "50k", "ssp1_50k.tif"))
+ssp1_50k <- rast(here("data", "50k", "ssp1_50k.tif")) 
 
 plot(ssp1_50k)
+crs(ssp1_50k)
 crs(ssp1_50k)
 ```
 
 # SSP2
 ```{r}
 # aggregate to 50k resolution
-ssp2_aggregate <- aggregate(ssp2, fact = abandon_factor, fun = sum)
+ssp2_aggregate <- aggregate(ssp2, fact = abandon_factor, fun = sum) 
 
 # replacing zeros with NA values for visualization
 ssp1_aggregate[ssp2_aggregate == 0] <- NA
@@ -138,7 +139,7 @@ carbon_aggregate <- carbon %>%
   project(y = crs(ssp1_50k))
 
 # make carbon layer exactly match the spatial extent of the abandonment
-carbon_resamp <- resample(carbon_aggregate, ssp1_50k, method = "bilinear")
+# carbon_resamp <- resample(carbon_aggregate, ssp1_50k, method = "bilinear")
 
 # saving out the raster
 writeRaster(carbon_resamp, filename = "data/carbon/carbon_50k.tif", overwrite = TRUE)

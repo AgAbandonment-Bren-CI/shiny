@@ -9,14 +9,16 @@ library(shinythemes)
 library(shinyjs)
 
 # read in the raster data
-ssp1 <- raster(here("data", "50k", "ssp1_50k.tif"))
-ssp2 <- raster(here("data", "50k", "ssp2_50k.tif"))
-ssp3 <- raster(here("data", "50k", "ssp3_50k.tif"))
-ssp4 <- raster(here("data", "50k", "ssp4_50k.tif"))
-ssp5 <- raster(here("data", "50k", "ssp5_50k.tif"))
-carbon <- raster(here("data", "carbon", "carbon_50k.tif"))
-# bd <- raster(here("data", "50k", "bd_50k.tif"))
-               
+ssp1 <- rast(here("data", "50k", "ssp1_50k.tif")) %>% project("epsg:4326")
+ssp2 <- rast(here("data", "50k", "ssp2_50k.tif")) %>% project("epsg:4326")
+ssp3 <- rast(here("data", "50k", "ssp3_50k.tif")) %>% project("epsg:4326")
+ssp4 <- rast(here("data", "50k", "ssp4_50k.tif")) %>% project("epsg:4326")
+ssp5 <- rast(here("data", "50k", "ssp5_50k.tif")) %>% project("epsg:4326")
+carbon <- rast(here("data", "carbon", "carbon_50k.tif")) %>% project("epsg:4326") 
+# bd <- raster(here("data", "50k", "bd_50k.tif")) %>% project("epsg:4326")
+
+vec <- c("ssp1", "ssp2", "ssp3", "ssp4", "ssp5")
+
 ### BEGIN UI ###
 
 ui <- fluidPage(
@@ -71,12 +73,12 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 # Front page tmap
-    output$ab_tmap <- renderTmap({
-      tm_shape(ssp1) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
-        tm_raster(col = "ssp1_50k", palette = "Reds", style = "cont", alpha = 0.7) + 
-        tm_shape(carbon) +
-        tm_raster(col = "carbon_50k", palette = "Blues", style = "cont", alpha = input$carbon_slide)
-    }) # end tmap 1
+  output$ab_tmap <- renderTmap({
+    tm_shape(ssp1) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
+      tm_raster(title = "Abandonment (km^2)", col = "global_PFT_2015", palette = "Reds", style = "cont", alpha = 0.7) + 
+      tm_shape(carbon) +
+      tm_raster(title = "C seq. (mg/ha/yr)", col = "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr", palette = "Blues", style = "cont", alpha = input$carbon_slide)
+  }) # end tmap 1
 }
 
 # Run the application 
