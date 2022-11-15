@@ -1,0 +1,91 @@
+---
+title: "csv_builder"
+author: "Lucas Boyd"
+date: "2022-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(shiny)
+library(here)
+library(tmap)
+library(terra)
+library(shinythemes)
+library(shinyjs)
+library(tidyverse)
+library(kableExtra)
+
+```
+
+
+```{r}
+# read in the raster data
+ssp1 <- rast(here("data", "50k", "ssp1_50k.tif")) %>% project("epsg:4326")
+ssp2 <- rast(here("data", "50k", "ssp2_50k.tif")) %>% project("epsg:4326")
+ssp3 <- rast(here("data", "50k", "ssp3_50k.tif")) %>% project("epsg:4326")
+ssp4 <- rast(here("data", "50k", "ssp4_50k.tif")) %>% project("epsg:4326")
+ssp5 <- rast(here("data", "50k", "ssp5_50k.tif")) %>% project("epsg:4326")
+carbon <- rast(here("data", "carbon", "carbon_50k.tif")) %>% project("epsg:4326") 
+```
+
+# Total abandonment 
+```{r}
+# creating a dataframe with total abandonment values for each SSP
+
+ab_ssp1 <- global(ssp1, "sum", na.rm = TRUE) %>% 
+  rownames_to_column() %>% 
+  mutate(ssp = case_when(rowname == "global_PFT_2015" ~ "SSP 1"))
+ab_ssp2 <- global(ssp2, "sum", na.rm = TRUE) %>% 
+  rownames_to_column() %>% 
+  mutate(ssp = case_when(rowname == "global_PFT_2015" ~ "SSP 2"))
+ab_ssp3 <- global(ssp3, "sum", na.rm = TRUE) %>% 
+  rownames_to_column() %>% 
+  mutate(ssp = case_when(rowname == "global_PFT_2015" ~ "SSP 3"))
+ab_ssp4 <- global(ssp4, "sum", na.rm = TRUE) %>% 
+  rownames_to_column() %>% 
+  mutate(ssp = case_when(rowname == "global_PFT_2015" ~ "SSP 4"))
+ab_ssp5 <- global(ssp5, "sum", na.rm = TRUE) %>% 
+  rownames_to_column() %>% 
+  mutate(ssp = case_when(rowname == "global_PFT_2015" ~ "SSP 5"))
+
+total_ab_df <- rbind(ab_ssp1, ab_ssp2, ab_ssp3, ab_ssp4, ab_ssp5) %>% 
+  dplyr::select(-rowname) %>% 
+  mutate(abandonment_millions_km2 = sum/1000000) %>% 
+  dplyr::select(-sum)
+  
+```
+
+# saving out the CSVs
+```{r}
+total_ab_df %>% write_csv(file = "data/csv/total_abandonment.csv", append = FALSE)
+```
+
+# reading in abandonment CSV - FOR SHINY START HERE
+```{r}
+abandonment_total <- read_csv(here("data", "csv", "total_abandonment.csv")) 
+```
+
+# plotting abandonment 
+Paper that might explain the data: https://www.sciencedirect.com/science/article/pii/S0959378016303399 
+
+```{r}
+# plotting abandonment
+ggplot(data = abandonment_total, aes(x = ssp, y = abandonment_millions_km2), alpha = 0.9) +
+  geom_col(fill = "brown4") +
+  theme_minimal(14) + 
+  labs(x = element_blank(), y = "Global abandonment (millions km^2)") +
+  theme(axis.text.x = element_text(
+    vjust = 5, size = 16))
+  
+  
+```
+
+
+
+
+
+
+
+

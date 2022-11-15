@@ -2,7 +2,6 @@
 library(shiny)
 library(here)
 library(tidyverse)
-library(raster)
 library(tmap)
 library(terra)
 library(shinythemes)
@@ -49,7 +48,8 @@ ui <- fluidPage(
                                                   "SSP 2" = "ssp2", 
                                                   "SSP 3" = "ssp3",
                                                   "SSP 4" = "ssp4",
-                                                  "SSP 5" = "ssp5")),
+                                                  "SSP 5" = "ssp5"),
+                                      selected = "ssp1"),
                           sliderInput("carbon_slide", label = h3("Carbon Sequestration Potential"), 
                                       min = 0, 
                                       max = 1, 
@@ -74,19 +74,20 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   ssp_reactive <- reactive({ 
-  message("value of ssp_radio", paste(input$ssp_radio, collapse = ";")) 
+    req(input$ssp_radio)
+  message("value of ssp_radio = ", paste(input$ssp_radio)) 
     input$ssp_radio
   }) # end reactive subset
   
-  
 # Front page tmap
   output$ab_tmap <- renderTmap({
+    req(input$ssp_radio)
     tm_shape(shp = ssp_reactive()) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
       tm_raster(title = "Abandonment (km^2)", 
                 col = "global_PFT_2015", 
                 palette = "Reds", 
                 style = "cont", 
-                alpha = 0.7) + 
+                alpha = 0.7) +
       tm_shape(carbon) +
       tm_raster(title = "C seq. (mg/ha/yr)", 
                 col = "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr", 
