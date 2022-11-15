@@ -18,16 +18,52 @@ library(tidyverse)
 library(kableExtra)
 
 ```
+# 2015 base crops layer
+```{r}
+# reading in raw 2015 land type data
+raw_ag <- rast(here("data", "global_PFT_2015.tif"))
 
+# create matrix for reclassification
+reclass_df <- c(1, 0,	  #Water
+                2, 0,	  #Broadleaf evergreen tree, tropical
+                3, 0,	  #Broadleaf evergreen tree, temperate
+                4, 0,	  #Broadleaf deciduous tree, tropical
+                5, 0,	  #Broadleaf deciduous tree, temperate
+                6, 0,	  #Broadleaf deciduous tree, boreal
+                7, 0,	  #Needleleaf evergreen tree, temperate
+                8, 0,	  #Needleleaf evergreen tree, boreal
+                9, 0,	  #Needleleaf deciduous tree
+                10, 0,	#Broadleaf evergreen shrub, temperate
+                11, 0,	#Broadleaf deciduous shrub, temperate
+                12, 0,	#Broadleaf deciduous shrub, boreal
+                13, 0,	#C3 grass, arctic
+                14, 0,	#C3 grass
+                15, 0,	#C4 grass
+                16, 0,	#Mixed C3/C4 grass
+                17, 0,	#Barren
+                18, 1,	#Cropland
+                19, 0,	#Urban
+                20, 0,  #Permanent snow and ice
+                128, 0)	#N/A values
+reclass_m <- matrix(reclass_df, ncol=2, byrow=TRUE)
+
+# reclassify 2015 layer
+crops_2015 <- classify(raw_ag, reclass_m)
+
+# calculating total cropland in chen's 2015 baseline
+total_crops_2015 <- global(crops_2015, "sum", na.rm = TRUE)
+
+# pulling a single value for 2015 cropland
+total_crops_value_2015 <- total_crops_2015$sum[1] 
+```
 
 ```{r}
 # read in the raster data
-ssp1 <- rast(here("data", "50k", "ssp1_50k.tif")) %>% project("epsg:4326")
-ssp2 <- rast(here("data", "50k", "ssp2_50k.tif")) %>% project("epsg:4326")
-ssp3 <- rast(here("data", "50k", "ssp3_50k.tif")) %>% project("epsg:4326")
-ssp4 <- rast(here("data", "50k", "ssp4_50k.tif")) %>% project("epsg:4326")
-ssp5 <- rast(here("data", "50k", "ssp5_50k.tif")) %>% project("epsg:4326")
-carbon <- rast(here("data", "carbon", "carbon_50k.tif")) %>% project("epsg:4326") 
+ssp1 <- rast(here("data", "chen", "ssp1_abandoned_cropland_2050_global.tif"))
+ssp2 <- rast(here("data", "chen", "ssp2_abandoned_cropland_2050_global.tif"))
+ssp3 <- rast(here("data", "chen", "ssp3_abandoned_cropland_2050_global.tif"))
+ssp4 <- rast(here("data", "chen", "ssp4_abandoned_cropland_2050_global.tif"))
+ssp5 <- rast(here("data", "chen", "ssp5_abandoned_cropland_2050_global.tif"))
 ```
 
 # Total abandonment 
@@ -52,8 +88,9 @@ ab_ssp5 <- global(ssp5, "sum", na.rm = TRUE) %>%
 
 total_ab_df <- rbind(ab_ssp1, ab_ssp2, ab_ssp3, ab_ssp4, ab_ssp5) %>% 
   dplyr::select(-rowname) %>% 
-  mutate(abandonment_millions_km2 = sum/1000000) %>% 
-  dplyr::select(-sum)
+  mutate(percent = round((sum/total_crops_value_2015)*100, 1)) %>% 
+  mutate(abandonment_millions_km2 = sum/1000000) %>% # convert to millions
+  dplyr::select(-sum) 
   
 ```
 
@@ -72,12 +109,15 @@ Paper that might explain the data: https://www.sciencedirect.com/science/article
 
 ```{r}
 # plotting abandonment
-ggplot(data = abandonment_total, aes(x = ssp, y = abandonment_millions_km2), alpha = 0.9) +
-  geom_col(fill = "brown4") +
+ggplot(data = abandonment_total, aes(x = ssp, y = abandonment_millions_km2, fill = abandonment_millions_km2), alpha = 0.9) +
+  geom_col() +
   theme_minimal(14) + 
   labs(x = element_blank(), y = "Global abandonment (millions km^2)") +
   theme(axis.text.x = element_text(
-    vjust = 5, size = 16))
+    vjust = 5, size = 16)) + 
+  geom_text(aes(x = ssp, y = abandonment_millions_km2 + .2, label = paste(percent, "%")), color = "black", size = 7) +
+  theme(legend.position = "none") +
+  scale_fill_gradientn(colors = c("deepskyblue3", "deepskyblue4"))
   
   
 ```

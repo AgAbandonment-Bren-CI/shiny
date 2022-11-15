@@ -170,3 +170,4 @@ tm_shape(bd_aggregate) +
   tm_raster("sparc_conservationPriorities")
 bd_aggregate
 ```
+
