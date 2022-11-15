@@ -42,7 +42,7 @@ plot(bd)
 # determine factor by which to expand abandonment raster
 abandon_factor <- 50 # for SSP abandonment rasters (original = 1k)
 carbon_factor <- 50 # for carbon layer (original = 1k)
-bd_factor <- 10 # for biodiversity layer (original = ~5k)
+bd_factor <- 2 # for biodiversity layer (original = ~5k)
 
 ## Is this easier than just putting the numbers in the aggregate() fxn? -NM
 ```
@@ -56,18 +56,25 @@ ssp1_aggregate <- aggregate(ssp1, fact = abandon_factor, fun = sum) %>% project(
 # replacing zeros with NA values for visualization
 ssp1_aggregate[ssp1_aggregate == 0] <- NA
 
+# changing to proportion abandonment
+ssp1_aggregate <- ssp1_aggregate/(abandon_factor*abandon_factor)
+
 # save out the raster
 
 ## changed filename to automatically save in correct folder
 ## that way you don't manually have to move it and reload within this code chunk -NM
 writeRaster(ssp1_aggregate, filename = "data/50k/ssp1_50k.tif", overwrite = TRUE)
 
-
 ssp1_50k <- rast(here("data", "50k", "ssp1_50k.tif")) 
 
 plot(ssp1_50k)
-crs(ssp1_50k)
-crs(ssp1_50k)
+```
+
+
+```{r}
+tmap_mode(mode = "view")
+tm_shape(ssp1_50k) + 
+  tm_raster()
 ```
 
 # SSP2
@@ -76,7 +83,11 @@ crs(ssp1_50k)
 ssp2_aggregate <- aggregate(ssp2, fact = abandon_factor, fun = sum) 
 
 # replacing zeros with NA values for visualization
-ssp1_aggregate[ssp2_aggregate == 0] <- NA
+ssp2_aggregate[ssp2_aggregate == 0] <- NA
+
+# changing to a proportion abandonment
+ssp2_aggregate <- ssp2_aggregate/(abandon_factor*abandon_factor)
+
 
 # save out the raster
 writeRaster(ssp2_aggregate, filename = "data/50k/ssp2_50k.tif", overwrite = TRUE)
@@ -93,6 +104,9 @@ ssp3_aggregate <- aggregate(ssp3, fact = abandon_factor, fun = sum)
 # replacing zeros with NA values for visualization
 ssp3_aggregate[ssp3_aggregate == 0] <- NA
 
+# changing to a proportion abandonment
+ssp3_aggregate <- ssp3_aggregate/(abandon_factor*abandon_factor)
+
 # save out the raster
 writeRaster(ssp3_aggregate, filename = "data/50k/ssp3_50k.tif", overwrite = TRUE)
 
@@ -107,6 +121,9 @@ ssp4_aggregate <- aggregate(ssp4, fact = abandon_factor, fun = sum)
 
 # replacing zeros with NA values for visualization
 ssp4_aggregate[ssp4_aggregate == 0] <- NA
+
+# changing to a proportion abandonment
+ssp4_aggregate <- ssp4_aggregate/(abandon_factor*abandon_factor)
 
 # save out the raster
 writeRaster(ssp4_aggregate, filename = "data/50k/ssp4_50k.tif", overwrite = TRUE)
@@ -123,6 +140,9 @@ ssp5_aggregate <- aggregate(ssp5, fact = abandon_factor, fun = sum)
 
 # replacing zeros with NA values for visualization
 ssp5_aggregate[ssp5_aggregate == 0] <- NA
+
+# changing to a proportion abandonment
+ssp5_aggregate <- ssp5_aggregate/(abandon_factor*abandon_factor)
 
 # save out the raster
 writeRaster(ssp5_aggregate, filename = "data/50k/ssp5_50k.tif", overwrite = TRUE)
@@ -142,7 +162,7 @@ carbon_aggregate <- carbon %>%
 # carbon_resamp <- resample(carbon_aggregate, ssp1_50k, method = "bilinear")
 
 # saving out the raster
-writeRaster(carbon_resamp, filename = "data/carbon/carbon_50k.tif", overwrite = TRUE)
+writeRaster(carbon_aggregate, filename = "data/carbon/carbon_50k.tif", overwrite = TRUE)
 
 carbon_50k <- rast(here("data", "carbon", "carbon_50k.tif"))
 
@@ -150,7 +170,7 @@ plot(carbon_50k)
 ```
 
 # BIODIVERSITY - projection still coming up weird
-```{r}
+```{r, eval= FALSE}
 # change biodiversity to CRS of abandonment then project in same crs
 bd_aggregate <- bd %>% 
   aggregate(fact = bd_factor, fun = mean, na.rm = TRUE) %>% 

@@ -16,6 +16,8 @@ ssp5 <- rast(here("data", "50k", "ssp5_50k.tif")) %>% project("epsg:4326")
 carbon <- rast(here("data", "carbon", "carbon_50k.tif")) %>% project("epsg:4326") 
 # bd <- raster(here("data", "50k", "bd_50k.tif")) %>% project("epsg:4326")
 
+# reading in total abandonment CSV
+abandonment_total <- read_csv(here("data", "csv", "total_abandonment.csv")) 
 vec <- c("ssp1", "ssp2", "ssp3", "ssp4", "ssp5")
 
 ### BEGIN UI ###
@@ -30,7 +32,7 @@ ui <- fluidPage(
              
              tabPanel("Introduction", icon = icon("align-left"),
                       titlePanel("Introduction"),
-                      mainPanel(width = 10, h5(strong("Authors:"), "Michelle Geldin", "Shayan Kaveh", "Nickolas McManus", "Lucas Boyd"),
+                      mainPanel(width = 10, h5(strong("Authors:"), "Michelle Geldin |", "Shayan Kaveh |", "Nickolas McManus |", "Max Settineri |", "Lucas Boyd"),
                                 img(src = "barn.jpeg")
               
                       )), #END TAB 1
@@ -51,7 +53,7 @@ ui <- fluidPage(
                                                   "SSP 5" = "ssp5"),
                                       selected = "ssp1"),
                           sliderInput("carbon_slide", label = h3("Carbon Sequestration Potential"), 
-                                      min = 0, 
+                                      min = 0.01, 
                                       max = 1, 
                                       value = 0.5),
                         ), # end sidebar panel
@@ -62,6 +64,8 @@ ui <- fluidPage(
                                   tmapOutput(outputId = "ab_tmap"),
                                   p(strong("Figure 1:"),"Red indicates projected agricultural abandonment, with darker colors signaling more abandonment in a given pixel. The blue represents carbon sequestration potential of land for 30 years following human disturbance. For a higher resolution look at this data go to **this google earth engine repo to be created**"),
                                   p("Data Source", a(href = "https://data.globalforestwatch.org/documents/gfw::carbon-accumulation-potential-from-natural-forest-regrowth-in-forest-and-savanna-biomes/about ", "Carbon Accumulation Potential"), ""),
+                                  plotOutput(outputId = "total_abandonment_plot"),
+                                  p(strong("Figure 2:"), "Total abandoned cropland globally in 2050 (km^2) by climate scenario.")
                         ) # end main panel tab 1
                       ) # end sidebarlayout
              ) # end tab 2
@@ -82,8 +86,9 @@ server <- function(input, output) {
 # Front page tmap
   output$ab_tmap <- renderTmap({
     req(input$ssp_radio)
-    tm_shape(shp = ssp_reactive()) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
-      tm_raster(title = "Abandonment (km^2)", 
+    message(input$ssp_radio)
+    tm_shape(shp = ssp1) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
+      tm_raster(title = "Proportion of abandonment", 
                 col = "global_PFT_2015", 
                 palette = "Reds", 
                 style = "cont", 
@@ -95,6 +100,23 @@ server <- function(input, output) {
                 style = "cont", 
                 alpha = input$carbon_slide)
   }) # end tmap 1
+  
+  # total abandonment ggplot panel 1
+  output$total_abandonment_plot <- renderPlot({
+    ggplot(data = abandonment_total, aes(x = ssp, y = abandonment_millions_km2, fill = abandonment_millions_km2), alpha = 0.9) +
+      geom_col() +
+      theme_minimal(14) + 
+      labs(x = element_blank(), y = "Global abandonment (millions km^2)") +
+      theme(axis.text.x = element_text(
+        vjust = 5, 
+        size = 16), 
+        axis.text.y = element_text(
+          size = 16
+        )) + 
+      geom_text(aes(x = ssp, y = abandonment_millions_km2 + .2, label = paste(percent, "%")), color = "black", size = 7) +
+      theme(legend.position = "none") +
+      scale_fill_gradientn(colors = c("deepskyblue3", "deepskyblue4"))
+  })
 }
 
 
