@@ -114,7 +114,11 @@ ggplot(data = abandonment_total, aes(x = ssp, y = abandonment_millions_km2, fill
   theme_minimal(14) + 
   labs(x = element_blank(), y = "Global abandonment (millions km^2)") +
   theme(axis.text.x = element_text(
-    vjust = 5, size = 16)) + 
+    vjust = 5, 
+    size = 16), 
+    axis.text.y = element_text(
+      size = 16
+    )) + 
   geom_text(aes(x = ssp, y = abandonment_millions_km2 + .2, label = paste(percent, "%")), color = "black", size = 7) +
   theme(legend.position = "none") +
   scale_fill_gradientn(colors = c("deepskyblue3", "deepskyblue4"))
