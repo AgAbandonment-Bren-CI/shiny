@@ -1,0 +1,33 @@
+---
+title: "Untitled"
+author: "Lucas Boyd"
+date: "2022-11-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(raster)
+library(tmap)
+library(sf)
+library(raster)
+library(terra)
+```
+
+```{r}
+bd <- rast(here("data", "bd", "sparc_conservationPriorities.tif")) %>% project("epsg:4326") %>% 
+  aggregate(fact = 10, fun = mean, na.rm = TRUE)
+
+```
+
+```{r}
+tmap_mode(mode = "view")
+
+tm_shape(shp = bd) +
+  tm_raster(col = "sparc_conservationPriorities", palette = "Greens")
+bd
+plot(bd)
+```
+

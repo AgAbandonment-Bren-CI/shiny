@@ -1,3 +1,17 @@
+
+
+# TO DO
+
+# 1. Find and add biodiversity data
+# 2. Figure out how to include borders in the carbon layer
+# 3. Improve resolution on global map
+# 3. Make radio buttons for SSPs reactive
+# 4. Create csv for country level results, and then analyze/visualize that data
+# 5. create tab(s) for objective 2 in the shiny
+# Other ideas (if time)
+# - abandonment by crop type
+# - abandonment at different time horizons
+
 # attach packages
 library(shiny)
 library(here)
@@ -39,7 +53,7 @@ ui <- fluidPage(
              
              ### SECOND TAB ###
              
-             tabPanel("Abandonment", icon = icon("seedling"),
+             tabPanel("Global", icon = icon("globe"),
                       titlePanel("Major Trends in Projected Global Agricultural Abandonment"),
                       sidebarLayout(
                         sidebarPanel(
@@ -52,10 +66,18 @@ ui <- fluidPage(
                                                   "SSP 4" = "ssp4",
                                                   "SSP 5" = "ssp5"),
                                       selected = "ssp1"),
+                          sliderInput("abandon_slide", label = h3("Abandonment"), 
+                                      min = 0.01, 
+                                      max = 1, 
+                                      value = 0.5),
                           sliderInput("carbon_slide", label = h3("Carbon Sequestration Potential"), 
                                       min = 0.01, 
                                       max = 1, 
                                       value = 0.5),
+                          sliderInput("bd_slide", label = h3("Biodiversity"), 
+                                      min = 0.01, 
+                                      max = 1, 
+                                      value = 0.5)
                         ), # end sidebar panel
                         
                         # A plot of biodiversity in the main panel
@@ -65,10 +87,15 @@ ui <- fluidPage(
                                   p(strong("Figure 1:"),"Red indicates projected agricultural abandonment, with darker colors signaling more abandonment in a given pixel. The blue represents carbon sequestration potential of land for 30 years following human disturbance. For a higher resolution look at this data go to **this google earth engine repo to be created**"),
                                   p("Data Source", a(href = "https://data.globalforestwatch.org/documents/gfw::carbon-accumulation-potential-from-natural-forest-regrowth-in-forest-and-savanna-biomes/about ", "Carbon Accumulation Potential"), ""),
                                   plotOutput(outputId = "total_abandonment_plot"),
-                                  p(strong("Figure 2:"), "Total abandoned cropland globally in 2050 (km^2) by climate scenario.")
+                                  p(strong("Figure 2:"), "Total abandoned cropland globally in 2050 (km^2) by climate scenario. Percentages indicate the proportion of total cropland that is projected to be abandoned.")
                         ) # end main panel tab 1
                       ) # end sidebarlayout
-             ) # end tab 2
+             ), # end tab 2
+             tabPanel("Country-level",  icon = icon("flag"),
+                      titlePanel("Abandonment by country"),
+                      mainPanel(width = 10, strong("Directions")
+                      ) # end main panel of tab 3
+             ) # end tab 3
   ) # end navbarpage
 ) # end UI
 
@@ -88,17 +115,18 @@ server <- function(input, output) {
     req(input$ssp_radio)
     message(input$ssp_radio)
     tm_shape(shp = ssp1) + # *** need to find a way to make this reactive to different rasters input$ssp_radio
-      tm_raster(title = "Proportion of abandonment", 
+      tm_raster(title = "Proportion abandoned", 
                 col = "global_PFT_2015", 
                 palette = "Reds", 
                 style = "cont", 
-                alpha = 0.7) +
-      tm_shape(carbon) +
+                alpha = input$abandon_slide) +
+      tm_shape(carbon, raster.downsample = FALSE) +
       tm_raster(title = "C seq. (mg/ha/yr)", 
                 col = "sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr", 
                 palette = "Blues", 
                 style = "cont", 
-                alpha = input$carbon_slide)
+                alpha = input$carbon_slide) # + need to figure out what's going on with this downsampling - abandonment map comes up blank when max.raster is expanded
+     #  tmap_options(max.raster = c(plot = 1e10, view = 1e10)) 
   }) # end tmap 1
   
   # total abandonment ggplot panel 1
@@ -118,7 +146,6 @@ server <- function(input, output) {
       scale_fill_gradientn(colors = c("deepskyblue3", "deepskyblue4"))
   })
 }
-
 
 
 # Run the application 
